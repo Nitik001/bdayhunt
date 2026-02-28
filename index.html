@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Scavenger Hunt</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Great+Vibes&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Markdown Parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Dancing Script', 'cursive'], 
+                        script: ['Great Vibes', 'cursive'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        primary: '#f43f5e', 
+                        accent: '#fbbf24', 
+                        deepspace: '#1e1b4b',
+                        starlight: '#fbbf24',
+                        glass: 'rgba(255, 255, 255, 0.07)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* BASE THEME (Light Mode Defaults) */
+        body {
+            background: linear-gradient(to bottom, #fff1f2, #ffe4e6, #fce7f3);
+            color: #831843; /* pink-900 */
+            transition: background 0.5s ease, color 0.5s ease;
+            cursor: default;
+        }
+
+        /* DARK MODE OVERRIDES */
+        html.dark body {
+            background-color: #2e1065;
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 3px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 2px),
+                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 3px),
+                linear-gradient(to bottom, #2e1065 0%, #1e1b4b 100%);
+            background-size: 550px 550px, 350px 350px, 250px 250px, 100% 100%;
+            background-position: 0 0, 40px 60px, 130px 270px, 0 0;
+            background-attachment: fixed;
+            color: white;
+        }
+        
+        /* Focus styles for accessibility */
+        :focus-visible {
+            outline: 2px solid #fbbf24;
+            outline-offset: 2px;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        /* Glassmorphism for Containers */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(244, 63, 94, 0.2);
+            box-shadow: 0 10px 40px rgba(244, 63, 94, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.5s ease;
+        }
+
+        html.dark .glass-card {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .neon-text {
+            /* Light mode: stronger drop shadow instead of glow */
+            text-shadow: 0 2px 5px rgba(244, 63, 94, 0.3);
+        }
+
+        html.dark .neon-text {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8),
+                         0 0 20px rgba(255, 255, 255, 0.4),
+                         0 0 30px rgba(236, 72, 153, 0.6);
+        }
+        
+        /* Loading Spinners */
+        .spinner {
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        
+        .spinner-sm {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(244, 63, 94, 0.3);
+            border-top-color: #f43f5e;
+        }
+
+        html.dark .spinner-sm {
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fbbf24;
+        }
+
+        .spinner-lg {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(244, 63, 94, 0.2);
+            border-top-color: #be185d;
+        }
+
+        html.dark .spinner-lg {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #ec4899;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Cursor Trail Particles */
+        .cursor-particle {
+            position: fixed;
+            pointer-events: none;
+            width: 8px;
+            height: 8px;
+            background: #be185d;
+            border-radius: 50%;
+            opacity: 1;
+            z-index: 9999;
+            animation: particleFade 1s forwards;
+        }
+        
+        html.dark .cursor-particle {
+             background: white;
+        }
+
+        @keyframes particleFade {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        /* Lightbox */
+        #lightbox {
+            transition: opacity 0.3s ease;
+        }
+        #lightbox.hidden {
+            opacity: 0;
+            pointer-events: none;
+            visibility: hidden;
+        }
+        #lightbox:not(.hidden) {
+            opacity: 1;
+            pointer-events: auto;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans overflow-x-hidden transition-colors duration-500">
+
+    <!-- ==========================================
+         WELCOME SCREEN
+         ========================================== -->
+    <div id="welcome-screen" class="fixed inset-0 z-50 bg-pink-50 dark:bg-[#120514] text-pink-900 dark:text-white flex flex-col overflow-y-auto transition-colors duration-500" role="region" aria-label="Welcome Screen">
+        <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none" aria-hidden="true">
+            <!-- Blobs adapted for light/dark via CSS opacity or classes -->
+            <div class="absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-pink-300/30 dark:bg-purple-900/20 rounded-full blur-[120px]"></div>
+            <div class="absolute bottom-[-10%] right-[10%] w-[600px] h-[600px] bg-rose-300/30 dark:bg-pink-900/20 rounded-full blur-[120px]"></div>
+            <div id="petals-container"></div>
+        </div>
+
+        <nav class="relative z-10 flex justify-between items-center p-6 md:px-10 flex-shrink-0" aria-label="Welcome Navigation">
+            <div class="flex items-center gap-2">
+                <div class="bg-pink-600/10 dark:bg-pink-600/20 p-2 rounded-lg backdrop-blur-sm border border-pink-500/20">
+                    <i data-lucide="heart" class="text-pink-600 dark:text-pink-500 fill-current w-5 h-5" aria-hidden="true"></i>
+                </div>
+                <span class="font-bold tracking-widest text-sm uppercase text-pink-900/90 dark:text-white/90">The Path of Us</span>
+            </div>
+            
+            <div class="hidden md:flex gap-8 text-center font-mono text-xs text-pink-900/40 dark:text-white/40" aria-label="Countdown">
+                <div><span class="block text-xl text-pink-900 dark:text-white font-bold font-sans">00</span> DAYS</div>
+                <div><span class="block text-xl text-pink-900 dark:text-white font-bold font-sans">04</span> HOURS</div>
+                <div><span class="block text-xl text-pink-900 dark:text-white font-bold font-sans">23</span> MINS</div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                 <button onclick="toggleTheme()" class="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/20 flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition group" aria-label="Toggle Theme">
+                     <i data-lucide="moon" class="w-3 h-3 text-pink-900/70 dark:text-white/70 block dark:hidden" aria-hidden="true"></i>
+                     <i data-lucide="sun" class="w-3 h-3 text-pink-900/70 dark:text-white/70 hidden dark:block" aria-hidden="true"></i>
+                </button>
+                <button class="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/20 flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition" aria-label="Toggle Music">
+                     <i data-lucide="music" class="w-3 h-3 text-pink-900/70 dark:text-white/70" aria-hidden="true"></i>
+                </button>
+                <div class="w-8 h-8 rounded-full bg-pink-600 border border-white/20 flex items-center justify-center text-xs font-bold text-white" aria-hidden="true">S</div>
+            </div>
+        </nav>
+
+        <main class="flex-1 flex flex-col items-center justify-center relative z-10 px-4 pb-12">
+            <p class="text-pink-600 dark:text-pink-300 font-bold tracking-[0.3em] text-[10px] md:text-xs uppercase mb-4 animate-[fadeIn_1s_ease-out_0.5s_forwards] opacity-0">The Journey Begins...</p>
+            <h1 class="font-script text-7xl md:text-9xl text-pink-900 dark:text-white mb-2 leading-tight text-center animate-[fadeIn_1s_ease-out_0.8s_forwards] opacity-0 neon-text">
+                Happy Birthday
+            </h1>
+            <p class="font-serif italic text-pink-800/70 dark:text-white/70 text-xl md:text-2xl mb-12 animate-[fadeIn_1s_ease-out_1.1s_forwards] opacity-0">
+                My dearest love...
+            </p>
+
+            <div class="glass-card p-8 md:p-12 rounded-[2rem] max-w-2xl text-center shadow-2xl relative group animate-[fadeIn_1s_ease-out_1.4s_forwards] opacity-0 transform translate-y-4">
+                <div class="relative">
+                    <i data-lucide="quote" class="w-8 h-8 text-pink-400 dark:text-pink-300/50 mb-6 mx-auto" aria-hidden="true"></i>
+                    <p class="text-pink-950 dark:text-gray-200 text-lg md:text-xl leading-relaxed mb-8 font-light font-sans">
+                        Today isn't just about celebrating the day you were born, but celebrating every moment we've shared since. I've hidden pieces of my heart and our memories across the digital world.
+                        <br><br>
+                        <span class="text-pink-600 dark:text-pink-200 italic font-serif text-base">Are you ready to unlock the first clue?</span>
+                    </p>
+
+                    <button onclick="enterDashboard()" class="relative inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-pink-600 to-rose-600 rounded-full text-white font-bold tracking-wide shadow-lg shadow-pink-900/50 hover:shadow-pink-700/50 transition-all hover:-translate-y-1 hover:scale-105 group" aria-label="Start Scavenger Hunt">
+                        Start Scavenger Hunt
+                        <i data-lucide="arrow-right" class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+
+    <!-- ==========================================
+         MAIN DASHBOARD
+         ========================================== -->
+    <div id="dashboard-view" class="hidden min-h-screen flex flex-col transition-opacity duration-1000 opacity-0" aria-hidden="true" tabindex="-1">
+        
+        <!-- Navbar -->
+        <nav class="sticky top-0 z-50 border-b border-pink-900/5 dark:border-white/5 py-4 backdrop-blur-md bg-white/60 dark:bg-[#1e1b4b]/60 transition-colors duration-500" aria-label="Dashboard Navigation">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-12">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-pink-500/10 p-2 rounded-full border border-pink-500/20" aria-hidden="true">
+                            <i data-lucide="heart" class="w-4 h-4 text-pink-600 dark:text-pink-500 fill-current"></i>
+                        </div>
+                        <span class="font-bold text-lg tracking-tight text-pink-900 dark:text-white">The Path of Us</span>
+                    </div>
+                    
+                    <div class="flex items-center gap-8">
+                        <div class="hidden md:flex gap-8 text-sm font-semibold text-pink-800/70 dark:text-gray-300">
+                            <a href="#" class="hover:text-pink-600 dark:hover:text-white transition focus:text-pink-600 dark:focus:text-white">Rules</a>
+                            <a href="#" class="hover:text-pink-600 dark:hover:text-white transition focus:text-pink-600 dark:focus:text-white">Prizes</a>
+                            <a href="#" class="hover:text-pink-600 dark:hover:text-white transition focus:text-pink-600 dark:focus:text-white">Gallery</a>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <button onclick="toggleTheme()" class="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 flex items-center justify-center transition" aria-label="Toggle Theme">
+                                 <i data-lucide="moon" class="w-3 h-3 text-pink-900 dark:text-white block dark:hidden" aria-hidden="true"></i>
+                                 <i data-lucide="sun" class="w-3 h-3 text-pink-900 dark:text-white hidden dark:block" aria-hidden="true"></i>
+                            </button>
+                            <button onclick="location.reload()" class="hidden md:block bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-pink-900 dark:text-white text-xs font-bold py-2 px-6 rounded-full transition border border-black/10 dark:border-white/10" aria-label="Log Out">
+                                Log Out
+                            </button>
+                            <div class="w-10 h-10 rounded-full border-2 border-pink-900/10 dark:border-white/20 p-0.5 overflow-hidden" aria-hidden="true">
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Smita" alt="" class="w-full h-full rounded-full bg-white/10">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Container -->
+        <main id="main-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+            <!-- This content will be replaced by JS when game is complete -->
+            
+            <!-- Standard Header -->
+            <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-12" id="header-section">
+                <!-- Injected via JS -->
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12" id="game-grid">
+                <!-- Sidebar -->
+                <div class="lg:col-span-4 xl:col-span-3">
+                    <div class="glass-card rounded-2xl p-6 sticky top-24">
+                        <h3 class="font-bold text-lg mb-8 flex items-center gap-2 text-pink-900 dark:text-white">
+                            <i data-lucide="map" class="text-pink-600 dark:text-pink-400 w-5 h-5" aria-hidden="true"></i>
+                            Your Journey
+                        </h3>
+                        <div class="relative pl-2" id="timeline-container" role="list">
+                            <!-- Timeline Injected via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clue Area -->
+                <div class="lg:col-span-8 xl:col-span-9 space-y-12">
+                    <div id="main-content" class="fade-in">
+                        <!-- Dynamic Content -->
+                    </div>
+                    <!-- Gallery -->
+                    <div id="gallery-section" class="hidden pt-8 border-t border-pink-900/10 dark:border-white/10">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="font-bold text-xl text-pink-900 dark:text-white flex items-center gap-2">
+                                <i data-lucide="image" class="text-pink-600 dark:text-pink-400 w-5 h-5" aria-hidden="true"></i>
+                                Unlocked Memories
+                            </h3>
+                            <span class="text-xs font-mono text-pink-800/60 dark:text-gray-400" id="gallery-count" aria-live="polite">0 MEMORIES UNLOCKED</span>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-6" id="gallery-grid">
+                            <!-- Gallery Items -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Celebration Overlay -->
+    <div id="celebration-overlay" class="fixed inset-0 pointer-events-none z-[100] flex justify-center items-start pt-20" aria-hidden="true"></div>
+
+    <!-- Lightbox Overlay -->
+    <div id="lightbox" class="fixed inset-0 z-[200] bg-white/90 dark:bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Photo view">
+        <button class="absolute top-6 right-6 text-pink-900/50 dark:text-white/50 hover:text-pink-900 dark:hover:text-white transition focus:text-pink-900 dark:focus:text-white z-50" onclick="closeLightbox()" aria-label="Close photo view">
+            <i data-lucide="x" class="w-8 h-8" aria-hidden="true"></i>
+        </button>
+        <div class="max-w-4xl w-full max-h-[90vh] relative flex items-center justify-center">
+            <!-- Loading Spinner for Lightbox -->
+            <div id="lightbox-loader" class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div class="spinner spinner-lg"></div>
+            </div>
+            
+            <img id="lightbox-img" src="" class="w-full h-full object-contain rounded-lg shadow-2xl border border-white/10 transition-opacity duration-300 opacity-0" alt="Memory full view">
+            <p id="lightbox-caption" class="absolute bottom-0 left-0 w-full text-center text-white p-6 bg-gradient-to-t from-black/80 to-transparent font-serif italic text-xl rounded-b-lg"></p>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // GEMINI API CONFIGURATION
+        // ==========================================
+        // TODO: Add your Gemini API key here to enable AI hints
+        const apiKey = "";  
+
+        async function callGemini(prompt) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const payload = { contents: [{ parts: [{ text: prompt }] }] };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                return data.candidates?.[0]?.content?.parts?.[0]?.text || "The stars are silent...";
+            } catch (error) {
+                return "Connection weak. Ask again later.";
+            }
+        }
+
+        async function generateAIHint() {
+            const level = config.levels[currentLevelIndex];
+            const btn = document.getElementById('ai-hint-btn');
+            const output = document.getElementById('ai-hint-output');
+            
+            btn.disabled = true;
+            btn.setAttribute('aria-busy', 'true');
+            btn.innerHTML = `<span class="spinner spinner-sm mr-2" aria-hidden="true"></span> Consulting Cupid...`;
+            output.classList.add('hidden');
+            
+            const prompt = `Romantic scavenger hunt hint for "${level.clue}" (Answer: ${level.password}). Rhyming, charming, max 2 lines.`;
+            const hint = await callGemini(prompt);
+            
+            btn.innerHTML = `✨ Ask Cupid for a Hint`;
+            btn.disabled = false;
+            btn.removeAttribute('aria-busy');
+            
+            const parsedHint = (typeof marked !== 'undefined' && marked.parse) ? marked.parse(hint) : hint;
+            output.innerHTML = `<span class="font-bold text-pink-600 dark:text-pink-300 block mb-1">Cupid says:</span> <span class="italic text-pink-800 dark:text-gray-300">${parsedHint}</span>`;
+            output.classList.remove('hidden');
+            // Announce to screen reader
+            output.setAttribute('role', 'status');
+            output.setAttribute('aria-live', 'polite');
+        }
+
+        // ==========================================
+        // CONFIGURATION
+        // ==========================================
+        
+        const config = {
+            birthdayName: "Smita", 
+            // The short message on the final card
+            finalDestination: {
+                name: "Library's Roof",
+                description: "Pack your bags for a night under the stars. A private table is reserved, and the champagne is already on ice.",
+                image: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=1200&auto=format&fit=crop",
+                mapLink: "https://maps.google.com" // Update with real link
+            },
+            finalLetter: "You've followed every clue, solved every riddle, and walked down memory lane with me today. Just like this scavenger hunt, life with you is an adventure I never want to end. I wanted to create something as beautiful and unique as you are. But the real gift isn't on this screen. It's waiting for us, under the stars, at the place where we first said 'I love you'.",
+            
+            levels: [
+                {
+                    level: 1,
+                    title: "First Date Spot",
+                    subtitle: "U make my days sweeter. I'm in hope to make at least this day of yours sweet. Find me.",
+                    clue: "Let's start the day with something sweet. What was our first date spot?",
+                    image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?q=80&w=800&auto=format&fit=crop", 
+                    password: "car", 
+                    hint: "It has 4 wheels..."
+                },
+                {
+                    level: 2,
+                    title: "The Perfect Scent",
+                    subtitle: "Everything about you is perfect. I want you to smell as good as you are. Come on! You know this was coming.",
+                    clue: "What did i like the most about U?",
+                    image: "https://images.unsplash.com/photo-1541643600914-78b084683601?q=80&w=800&auto=format&fit=crop",
+                    password: "you",
+                    hint: "It's a three letter word..."
+                },
+                {
+                    level: 3,
+                    title: "Something You Deserve",
+                    subtitle: "Finally, I found something remotely close to you. This is something U always deserved. & wait You will get it today.",
+                    clue: "When did I give you the first flower?",
+                    image: "https://images.unsplash.com/photo-1490750967868-58cb75063ed4?q=80&w=800&auto=format&fit=crop",
+                    password: "7th june",
+                    hint: "A date in summer..."
+                },
+                {
+                    level: 4,
+                    title: "How Small Can You Get?",
+                    subtitle: "I always wonder how small you can get? 8 inch, yes you can get as small as 8 inches. Isn't that crazy? This would be a wild guess for you. I'm pretty sure.",
+                    clue: "Where did we watch our first movie?",
+                    image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=800&auto=format&fit=crop",
+                    password: "mall of dehradun",
+                    hint: "MDDA Complex..."
+                },
+                {
+                    level: 5,
+                    title: "The Final Adventure",
+                    subtitle: "We're going on an adventure date! You pick: Timezone or Blaaze Play Card.",
+                    clue: "Do you love me?",
+                    image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=800&auto=format&fit=crop",
+                    password: "yes bahut saara",
+                    hint: "Answer in Hinglish..."
+                }
+            ]
+        };
+        
+        // Romantic error messages instead of generic "oops"
+        const errorMessages = [
+            "Not quite, my love. Try again!",
+            "You're close, but that's not it!",
+            "Think back to that day...",
+            "Give it another try, beautiful!",
+            "That's not the secret word, darling.",
+            "Cupid says: Try again!"
+        ];
+
+        let currentLevelIndex = 0;
+        let isComplete = false;
+
+        function safeCreateIcons() {
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                lucide.createIcons();
+            }
+        }
+
+        function init() {
+            initTheme(); // Check local storage
+            startCursorTrail();
+            safeCreateIcons();
+            try {
+                renderAll();
+            } catch (e) {
+                console.error("Render error:", e);
+            }
+            
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeLightbox();
+                }
+            });
+        }
+        
+        // ==========================================
+        // THEME LOGIC
+        // ==========================================
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            // Default to dark if not set (or if user prefers dark)
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            createPetals();
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            
+            // Regenerate ambient effects
+            createPetals();
+            
+            // Trigger Lucide to update new icons
+            setTimeout(() => safeCreateIcons(), 0);
+        }
+
+        // ==========================================
+        // FAIRY DUST CURSOR (OPTIMIZED)
+        // ==========================================
+        function startCursorTrail() {
+            let lastTime = 0;
+            const throttleDelay = 50; // Throttle to ~20fps for particles
+
+            document.addEventListener('mousemove', function(e) {
+                const now = Date.now();
+                if (now - lastTime >= throttleDelay) {
+                    createParticle(e.clientX, e.clientY);
+                    lastTime = now;
+                }
+            });
+            
+            document.addEventListener('touchmove', function(e) {
+                const now = Date.now();
+                if (now - lastTime >= throttleDelay && e.touches[0]) {
+                    createParticle(e.touches[0].clientX, e.touches[0].clientY);
+                    lastTime = now;
+                }
+            });
+        }
+
+        function createParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.classList.add('cursor-particle');
+            document.body.appendChild(particle);
+            
+            const size = Math.random() * 6 + 2;
+            const isDark = document.documentElement.classList.contains('dark');
+            
+            // Different colors for modes
+            const colors = isDark 
+                ? ['#f472b6', '#fbbf24', '#ffffff', '#ec4899']
+                : ['#be185d', '#f43f5e', '#fb7185', '#9d174d'];
+                
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.backgroundColor = randomColor;
+            particle.style.left = `${x}px`;
+            particle.style.top = `${y}px`;
+            
+            const destX = x + (Math.random() - 0.5) * 50;
+            const destY = y + (Math.random() - 0.5) * 50;
+            
+            particle.animate([
+                { transform: `translate(0, 0)`, opacity: 0.8 },
+                { transform: `translate(${destX - x}px, ${destY - y}px)`, opacity: 0 }
+            ], {
+                duration: 1000,
+                easing: 'cubic-bezier(0, .9, .57, 1)',
+                fill: 'forwards'
+            });
+
+            setTimeout(() => particle.remove(), 1000);
+        }
+
+        function createPetals() {
+            const container = document.getElementById('petals-container');
+            if (!container) return;
+            container.innerHTML = ''; // Clear existing
+            
+            const isDark = document.documentElement.classList.contains('dark');
+            const colors = isDark 
+                ? ['#f472b6', '#ec4899', '#db2777'] 
+                : ['#fecdd3', '#fda4af', '#fb7185']; // Softer pinks for light mode
+                
+            // Reduced count for performance
+            for(let i = 0; i < 12; i++) {
+                const petal = document.createElement('div');
+                petal.classList.add('welcome-petal');
+                petal.style.position = 'absolute'; // Ensure positioning
+                petal.style.left = Math.random() * 100 + 'vw';
+                petal.style.width = (Math.random() * 5 + 3) + 'px';
+                petal.style.height = (Math.random() * 5 + 3) + 'px';
+                petal.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                petal.style.borderRadius = "50%";
+                petal.style.boxShadow = isDark ? "0 0 10px " + colors[Math.floor(Math.random() * colors.length)] : "none";
+                petal.style.opacity = isDark ? "0.8" : "0.6";
+                
+                // Animate manually via CSS class in real app, but here simple float
+                petal.animate([
+                    { transform: `translateY(0vh)`, opacity: 0 },
+                    { transform: `translateY(100vh)`, opacity: 1 }
+                ], {
+                    duration: (Math.random() * 10 + 10) * 1000,
+                    delay: -(Math.random() * 20) * 1000,
+                    iterations: Infinity
+                });
+                
+                container.appendChild(petal);
+            }
+        }
+
+        function enterDashboard() {
+            const welcome = document.getElementById('welcome-screen');
+            const dashboard = document.getElementById('dashboard-view');
+            
+            welcome.style.transition = 'opacity 0.8s ease-in-out';
+            welcome.style.opacity = '0';
+            
+            dashboard.classList.remove('hidden');
+            
+            // Improve screen reader experience by hiding welcome and showing dashboard
+            welcome.setAttribute('aria-hidden', 'true');
+            dashboard.setAttribute('aria-hidden', 'false');
+            
+            setTimeout(() => {
+                welcome.style.display = 'none';
+                dashboard.style.opacity = '1';
+                
+                // Move focus to dashboard for keyboard users
+                dashboard.focus();
+            }, 800);
+        }
+
+        function renderAll() {
+            if (isComplete) {
+                try {
+                    renderSuccessPage();
+                } catch (e) {
+                    console.error("Error rendering success page:", e);
+                }
+                return;
+            }
+            
+            try { renderHeader(); } catch (e) { console.error("Error rendering header:", e); }
+            try { renderTimeline(); } catch (e) { console.error("Error rendering timeline:", e); }
+            try { renderMainContent(); } catch (e) { console.error("Error rendering main content:", e); }
+            try { renderGallery(); } catch (e) { console.error("Error rendering gallery:", e); }
+            
+            safeCreateIcons();
+        }
+
+        function renderSuccessPage() {
+            // Replaces the entire main container with the specific success layout
+            const container = document.getElementById('main-container');
+            container.innerHTML = `
+                <div class="fade-in max-w-4xl mx-auto text-center flex flex-col gap-10">
+                    
+                    <!-- Header -->
+                    <div class="relative">
+                        <div class="text-[10px] font-bold tracking-[0.3em] text-pink-600 dark:text-pink-400 uppercase mb-2 animate-pulse">The Grand Finale</div>
+                        <h1 class="font-script text-7xl md:text-8xl text-pink-900 dark:text-white neon-text mb-4">
+                            Happy Birthday
+                        </h1>
+                        <p class="font-serif italic text-pink-800/60 dark:text-white/60 text-xl">My dearest love...</p>
+                        
+                        <!-- Floating Confetti Elements (Visual) -->
+                        <div class="absolute -top-10 -left-10 text-pink-500 opacity-50 animate-bounce" aria-hidden="true"><i data-lucide="heart" class="w-8 h-8 fill-current"></i></div>
+                         <div class="absolute top-10 -right-10 text-yellow-400 opacity-50 animate-pulse" aria-hidden="true"><i data-lucide="star" class="w-6 h-6 fill-current"></i></div>
+                    </div>
+
+                    <!-- Letter Card -->
+                    <div class="glass-card rounded-[2.5rem] p-10 md:p-14 text-left relative overflow-hidden group">
+                        <!-- Glow effect -->
+                        <div class="absolute -top-20 -right-20 w-64 h-64 bg-pink-600/10 dark:bg-pink-600/20 rounded-full blur-[80px] pointer-events-none group-hover:bg-pink-600/20 dark:group-hover:bg-pink-600/30 transition duration-1000" aria-hidden="true"></div>
+                        
+                        <div class="relative z-10">
+                            <i data-lucide="quote" class="w-8 h-8 text-pink-400 dark:text-pink-500/50 mb-6" aria-hidden="true"></i>
+                            
+                            <p class="text-xl md:text-2xl text-pink-900 dark:text-white/90 font-light leading-relaxed font-sans mb-8">
+                                ${config.finalLetter}
+                            </p>
+
+                            <div class="flex items-center justify-between border-t border-pink-900/10 dark:border-white/10 pt-6">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-full border-2 border-pink-500/30 p-0.5" aria-hidden="true">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Love" class="w-full h-full rounded-full bg-white/10">
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-bold text-pink-900 dark:text-white uppercase tracking-wider">TERU PREMI</div>
+                                        <div class="text-xs text-pink-600 dark:text-pink-300">Sent with all my love</div>
+                                    </div>
+                                </div>
+                                <i data-lucide="heart" class="text-pink-600 dark:text-pink-500 fill-current w-6 h-6 animate-pulse" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Destination Card -->
+                    <div class="glass-card rounded-[2.5rem] overflow-hidden p-0 flex flex-col md:flex-row relative group hover:shadow-2xl hover:shadow-pink-900/20 transition duration-500">
+                        <!-- Image Half -->
+                        <div class="w-full md:w-1/2 relative min-h-[300px]">
+                             <!-- Loader -->
+                            <div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+                                <div class="spinner spinner-lg"></div>
+                            </div>
+                            <!-- Image -->
+                            <img src="${config.finalDestination.image}" 
+                                 class="w-full h-full object-cover opacity-0 transition duration-700 group-hover:scale-105 relative z-0" 
+                                 alt="${config.finalDestination.name}"
+                                 onload="this.classList.remove('opacity-0'); this.previousElementSibling.style.display='none';">
+                            
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
+                            <div class="absolute bottom-6 left-6 z-20">
+                                <span class="bg-pink-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-widest shadow-lg">
+                                    8:00 PM Reservation
+                                </span>
+                                <h3 class="text-2xl font-bold text-white mt-2 drop-shadow-lg">${config.finalDestination.name}</h3>
+                            </div>
+                        </div>
+
+                        <!-- Content Half -->
+                        <div class="w-full md:w-1/2 p-10 flex flex-col justify-center bg-white/80 dark:bg-[#120514]/60 backdrop-blur-md text-left">
+                            <h3 class="text-2xl font-bold text-pink-900 dark:text-white mb-3">Your Destination Awaits</h3>
+                            <p class="text-pink-800 dark:text-gray-300 leading-relaxed mb-8 font-light">
+                                ${config.finalDestination.description}
+                            </p>
+                            
+                            <!-- Map Snippet Visual -->
+                            <div class="h-24 w-full bg-pink-900/5 dark:bg-white/5 rounded-xl mb-6 relative overflow-hidden opacity-80 dark:opacity-60 grayscale group-hover:grayscale-0 transition duration-500" aria-hidden="true">
+                                <img src="https://assets.codepen.io/t-1/dark-map.png" class="w-full h-full object-cover opacity-50">
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <i data-lucide="map-pin" class="text-pink-600 dark:text-pink-500 fill-current w-6 h-6 drop-shadow-lg animate-bounce"></i>
+                                </div>
+                            </div>
+
+                            <a href="${config.finalDestination.mapLink}" target="_blank" class="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-pink-900/30 transition transform hover:-translate-y-1 text-center flex items-center justify-center gap-2" aria-label="Open directions to destination">
+                                Open Directions <i data-lucide="arrow-right" class="w-4 h-4" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Footer & Gallery Revisit -->
+                    <div class="pb-10">
+                        <p class="font-script text-3xl text-pink-900/50 dark:text-white/50 mb-2">Forever yours,</p>
+                        <p class="font-bold text-sm tracking-[0.2em] uppercase text-pink-900/30 dark:text-white/30">[YOUR NAME]</p>
+                        
+                        <!-- Gallery Section for Success Page -->
+                        <div id="gallery-section" class="mt-12 pt-10 border-t border-pink-900/10 dark:border-white/10 w-full text-left">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="font-bold text-xl text-pink-900 dark:text-white flex items-center gap-2">
+                                    <i data-lucide="image" class="text-pink-600 dark:text-pink-400 w-5 h-5" aria-hidden="true"></i>
+                                    Unlocked Memories
+                                </h3>
+                                <span class="text-xs font-mono text-pink-800/60 dark:text-gray-400" id="gallery-count" aria-live="polite">0 MEMORIES UNLOCKED</span>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-6" id="gallery-grid">
+                                <!-- Injected -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Re-render gallery inside success page
+            renderGallery();
+            safeCreateIcons();
+            launchConfetti();
+        }
+
+        function renderHeader() {
+            const container = document.getElementById('header-section');
+            if (!container) return;
+
+            const progress = isComplete ? 100 : Math.round((currentLevelIndex / config.levels.length) * 100);
+            const headerHTML = `
+                <div>
+                    <div class="inline-flex items-center px-3 py-1.5 rounded-full border border-pink-600/20 dark:border-pink-500/20 bg-pink-100 dark:bg-pink-500/10 text-pink-700 dark:text-pink-300 text-xs font-bold tracking-wider uppercase mb-4">
+                        <i data-lucide="party-popper" class="w-3 h-3 mr-2" aria-hidden="true"></i> Birthday Hunt
+                    </div>
+                    <h1 class="font-display text-4xl lg:text-6xl text-pink-900 dark:text-white tracking-wide mb-3 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                        Happy Birthday, ${config.birthdayName}!
+                    </h1>
+                    <p class="text-pink-800/70 dark:text-purple-200/60 text-lg max-w-2xl leading-relaxed">
+                        Follow the path of our memories to find your gift. You've solved ${currentLevelIndex} out of ${config.levels.length} clues. Keep going, my love!
+                    </p>
+                </div>
+
+                <div class="glass-card p-6 rounded-2xl w-full lg:w-80 flex-shrink-0" aria-label="Progress">
+                    <div class="flex justify-between items-end mb-4">
+                        <span class="font-bold text-sm text-pink-900/90 dark:text-white/90">Progress</span>
+                        <span class="font-mono text-xl text-pink-600 dark:text-pink-400">${progress}%</span>
+                    </div>
+                    <div class="w-full bg-pink-900/10 dark:bg-white/10 rounded-full h-3 mb-3" role="progressbar" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100">
+                        <div class="bg-gradient-to-r from-pink-500 to-rose-500 h-3 rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_#ec4899]" style="width: ${progress}%"></div>
+                    </div>
+                    <div class="text-right text-xs font-bold text-pink-900/40 dark:text-white/40">
+                        ${currentLevelIndex}/${config.levels.length} Milestones
+                    </div>
+                </div>
+            `;
+            container.innerHTML = headerHTML;
+        }
+
+        function renderTimeline() {
+            const container = document.getElementById('timeline-container');
+            if (!container) return;
+            
+            let html = '';
+            config.levels.forEach((level, index) => {
+                let iconClass = "";
+                let iconContent = "";
+                let titleClass = "";
+                let subtitleClass = "text-gray-400";
+                let label = "";
+                let ariaLabel = "";
+                if (index < currentLevelIndex) {
+                    iconClass = "bg-yellow-100 border-2 border-yellow-200 text-yellow-500";
+                    iconContent = `<i data-lucide="heart" class="w-5 h-5 fill-current" aria-hidden="true"></i>`;
+                    titleClass = "text-yellow-600 dark:text-yellow-500/80 line-through decoration-2 opacity-70";
+                    label = `<span class="text-[9px] font-bold text-yellow-600/70 dark:text-yellow-500/70 uppercase tracking-wider mb-1 block">Solved 10:00 AM</span>`;
+                    ariaLabel = "Solved level: " + level.title;
+                } else if (index === currentLevelIndex) {
+                    iconClass = "bg-pink-600 shadow-[0_0_20px_rgba(236,72,153,0.6)] scale-110 border-4 border-white/20 text-white";
+                    iconContent = `<i data-lucide="map-pin" class="w-5 h-5 fill-current" aria-hidden="true"></i>`;
+                    titleClass = "text-pink-900 dark:text-white text-xl font-bold";
+                    subtitleClass = "text-pink-800/60 dark:text-pink-200/60";
+                    label = `<span class="text-[9px] font-bold text-pink-600 dark:text-pink-400 uppercase tracking-wider mb-1 block">Current Location</span>`;
+                    ariaLabel = "Current level: " + level.title;
+                } else {
+                    iconClass = "bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 text-pink-900/30 dark:text-white/30";
+                    iconContent = `<i data-lucide="lock" class="w-5 h-5" aria-hidden="true"></i>`;
+                    titleClass = "text-pink-900/20 dark:text-white/20 font-bold";
+                    label = `<span class="text-[9px] font-bold text-pink-900/20 dark:text-white/20 uppercase tracking-wider mb-1 block">Locked</span>`;
+                    ariaLabel = "Locked level: " + level.title;
+                }
+                html += `
+                    <div class="flex gap-6 mb-12 relative group z-10 pl-2" role="listitem" aria-label="${ariaLabel}">
+                        <div class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 flex-shrink-0 ${iconClass}">${iconContent}</div>
+                        <div class="pt-0.5">${label}<h4 class="mb-1 leading-tight transition-all duration-300 ${titleClass}">${level.title}</h4><p class="text-xs ${subtitleClass}">${level.subtitle}</p></div>
+                    </div>`;
+            });
+            html += '<div class="absolute left-[29px] top-4 bottom-12 w-0.5 bg-gradient-to-b from-pink-900/10 via-pink-900/5 to-transparent dark:from-white/20 dark:via-white/10 dark:to-transparent -z-10" aria-hidden="true"></div>';
+            container.innerHTML = html;
+        }
+
+        function renderMainContent() {
+            const container = document.getElementById('main-content');
+            if (!container) return;
+            
+            const level = config.levels[currentLevelIndex];
+            container.innerHTML = `
+                <div class="glass-card rounded-[2rem] overflow-hidden flex flex-col md:flex-row h-full min-h-[500px]">
+                    <div class="w-full md:w-[45%] relative bg-[#1e1b4b]">
+                        <div class="absolute top-6 left-6 z-20"><span class="bg-white/90 backdrop-blur-md text-pink-600 text-xs font-bold px-4 py-2 rounded-full shadow-sm">CLUE #${currentLevelIndex + 1}</span></div>
+                        
+                        <!-- Loader -->
+                        <div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+                            <div class="spinner spinner-lg"></div>
+                        </div>
+                        
+                        <!-- Image -->
+                        <img src="${level.image}" 
+                             class="w-full h-full object-cover opacity-0 transition-opacity duration-700 relative z-0" 
+                             alt="Image clue for ${level.title}"
+                             onload="this.classList.remove('opacity-0'); this.classList.add('opacity-90', 'hover:opacity-100'); this.previousElementSibling.style.display='none';">
+                        
+                        <!-- Gradient Overlay -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#1e1b4b] via-transparent to-transparent z-10 pointer-events-none"></div>
+                    </div>
+                    <div class="w-full md:w-[55%] p-8 md:p-12 flex flex-col justify-center bg-white/50 dark:bg-white/5 relative">
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-pink-600/10 dark:bg-pink-600/20 rounded-full blur-[100px] pointer-events-none" aria-hidden="true"></div>
+                        <div class="mb-10 relative">
+                            <div class="flex items-center gap-3 mb-4"><i data-lucide="ice-cream-2" class="w-6 h-6 text-pink-600 dark:text-pink-400" aria-hidden="true"></i><h2 class="font-bold text-2xl lg:text-3xl text-pink-900 dark:text-white">${level.title}</h2></div>
+                            <p class="text-pink-700 dark:text-pink-300 mb-6 font-medium text-lg">${level.subtitle}</p>
+                            <div class="relative pl-6 border-l-2 border-pink-500/50"><i data-lucide="quote" class="absolute -top-2 -left-3 w-6 h-6 text-pink-500 bg-white dark:bg-[#1e1b4b] rounded-full p-1" aria-hidden="true"></i><p class="text-xl text-pink-900 dark:text-white/90 italic font-serif leading-relaxed">"${level.clue}"</p></div>
+                        </div>
+                        <div class="space-y-6 mt-auto relative">
+                            <div class="flex gap-3">
+                                <input type="text" id="password-input" placeholder="Enter secret code..." aria-label="Enter secret code" class="flex-1 bg-white/50 dark:bg-black/20 border border-pink-900/10 dark:border-white/10 text-pink-900 dark:text-white placeholder-pink-900/30 dark:placeholder-white/30 text-lg rounded-xl px-6 py-4 focus:outline-none focus:border-pink-500 focus:bg-white/80 dark:focus:bg-black/40 transition-all" oninput="validateInput(this)" onkeypress="handleEnter(event)">
+                                <button onclick="toggleHint()" class="w-14 flex items-center justify-center rounded-xl border border-pink-900/10 dark:border-white/10 text-pink-900/50 dark:text-white/50 hover:text-pink-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/10 transition-all" title="Get a Hint" aria-label="Show Hint"><i data-lucide="lightbulb" class="w-5 h-5" aria-hidden="true"></i></button>
+                            </div>
+                            <button onclick="checkPassword()" class="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-bold text-sm tracking-wider py-5 rounded-xl shadow-[0_0_20px_rgba(236,72,153,0.3)] transition transform hover:-translate-y-1 uppercase" aria-label="Submit Answer">Submit Answer</button>
+                            <p id="hint-text" class="hidden text-sm text-pink-600 dark:text-pink-300 font-medium text-center bg-pink-100/50 dark:bg-pink-900/30 py-3 rounded-lg border border-pink-500/20 animate-fade-in" role="alert"><span class="font-bold uppercase tracking-wider">Hint:</span> ${level.hint}</p>
+                            <p id="error-msg" class="hidden text-sm text-red-500 dark:text-red-300 font-bold text-center animate-shake tracking-wide" role="alert"></p>
+                            <div class="pt-2 text-center"><button id="ai-hint-btn" onclick="generateAIHint()" class="text-xs font-bold text-pink-600 dark:text-pink-300 hover:text-pink-800 dark:hover:text-white uppercase tracking-widest transition-all flex items-center justify-center gap-2 mx-auto opacity-70 hover:opacity-100" aria-label="Ask Cupid AI for a hint"><i data-lucide="sparkles" class="w-3 h-3" aria-hidden="true"></i> Ask Cupid for a Hint</button><div id="ai-hint-output" class="hidden text-sm mt-4 p-4 rounded-xl glass-card text-left animate-fade-in border-l-2 border-pink-400" aria-live="polite"></div></div>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        // ==========================================
+        // LIGHTBOX
+        // ==========================================
+        function openLightbox(imgSrc, caption) {
+            const lightbox = document.getElementById('lightbox');
+            const img = document.getElementById('lightbox-img');
+            const loader = document.getElementById('lightbox-loader');
+            const cap = document.getElementById('lightbox-caption');
+            
+            // Reset State
+            img.classList.add('opacity-0');
+            loader.classList.remove('hidden');
+            
+            // Setup Content
+            img.alt = caption;
+            cap.textContent = caption;
+            lightbox.classList.remove('hidden');
+            
+            // Load Image
+            img.onload = () => {
+                img.classList.remove('opacity-0');
+                loader.classList.add('hidden');
+            };
+            img.src = imgSrc;
+            
+            // Trap focus on the close button initially
+            lightbox.querySelector('button').focus();
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.add('hidden');
+        }
+
+        function renderGallery() {
+            const grid = document.getElementById('gallery-grid');
+            const section = document.getElementById('gallery-section');
+            const countLabel = document.getElementById('gallery-count');
+            
+            if (!grid || !section || !countLabel) return;
+            
+            section.classList.remove('hidden');
+            let html = '';
+            // Render gallery items similar to before...
+            for (let i = 0; i < currentLevelIndex; i++) {
+                // ADDED CLICK HANDLER FOR LIGHTBOX AND CONVERTED TO BUTTON FOR ACCESSIBILITY
+                html += `<button onclick="openLightbox('${config.levels[i].image}', '${config.levels[i].title}')" class="w-full text-left aspect-[4/3] rounded-xl overflow-hidden relative group cursor-pointer border border-pink-900/10 dark:border-white/10 bg-white/50 dark:bg-black/50 hover:border-pink-500/50 transition-colors focus:outline-none focus:ring-2 focus:ring-pink-400" aria-label="View ${config.levels[i].title} in full screen">
+                    <img src="${config.levels[i].image}" class="w-full h-full object-cover transition duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100" alt="">
+                    <div class="absolute top-3 right-3"><span class="bg-yellow-400 text-yellow-900 text-[9px] font-bold px-2 py-1 rounded shadow-sm flex items-center gap-1 uppercase tracking-wider">Found</span></div>
+                    <div class="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black via-black/50 to-transparent"><p class="font-bold text-white text-sm uppercase tracking-wider">${config.levels[i].title}</p></div>
+                </button>`;
+            }
+            if (currentLevelIndex < config.levels.length) {
+                html += `<div class="aspect-[4/3] rounded-xl border border-dashed border-pink-900/10 dark:border-white/10 flex flex-col items-center justify-center text-pink-900/20 dark:text-white/20 bg-black/5 dark:bg-white/5" role="presentation"><i data-lucide="lock" class="w-6 h-6 mb-2 opacity-50" aria-hidden="true"></i><span class="text-[10px] font-bold uppercase tracking-[0.2em]">Locked Memory</span></div>`;
+            }
+            if(html) {
+                grid.innerHTML = html;
+                countLabel.textContent = `${currentLevelIndex} MEMORIES UNLOCKED`;
+            }
+        }
+
+        function handleEnter(e) { if (e.key === 'Enter') checkPassword(); }
+        function toggleHint() { document.getElementById('hint-text').classList.toggle('hidden'); }
+        
+        function validateInput(input) {
+            const regex = /[^a-zA-Z0-9 ]/g;
+            if (regex.test(input.value)) {
+                // Strip invalid characters
+                input.value = input.value.replace(regex, '');
+                
+                // Visual feedback
+                input.classList.add('shake', 'border-pink-500');
+                
+                const errorMsg = document.getElementById('error-msg');
+                errorMsg.textContent = "Only letters and numbers allowed, darling!";
+                errorMsg.classList.remove('hidden');
+                
+                // Remove shake effect after animation
+                setTimeout(() => {
+                    input.classList.remove('shake');
+                }, 500);
+            } else {
+                // If valid input and the current error is a validation error, clear it
+                const errorMsg = document.getElementById('error-msg');
+                if (!errorMsg.classList.contains('hidden') && 
+                    errorMsg.textContent.includes("letters and numbers")) {
+                    errorMsg.classList.add('hidden');
+                    input.classList.remove('border-pink-500');
+                }
+            }
+        }
+
+        function checkPassword() {
+            const input = document.getElementById('password-input');
+            const errorMsg = document.getElementById('error-msg');
+            if (!input) return;
+            const userGuess = input.value.trim().toLowerCase();
+            const correctPassword = config.levels[currentLevelIndex].password.toLowerCase();
+
+            if (userGuess === correctPassword) {
+                input.classList.remove('border-white/10');
+                input.classList.add('border-green-500', 'text-green-500', 'dark:text-green-400');
+                errorMsg.classList.add('hidden');
+                
+                // IMMEDIATE CELEBRATION!
+                launchMiniConfetti(); 
+
+                setTimeout(() => {
+                    currentLevelIndex++;
+                    if (currentLevelIndex >= config.levels.length) isComplete = true;
+                    renderAll();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    // EXTRA CELEBRATION FOR NEW LEVEL
+                    launchMiniConfetti();
+                    
+                    // Announce progress to screen reader? Ideally focus moves to new content.
+                }, 600);
+            } else {
+                input.classList.add('shake', 'border-red-500');
+                
+                // RANDOM ROMANTIC ERROR MESSAGE
+                const randomMsg = errorMessages[Math.floor(Math.random() * errorMessages.length)];
+                errorMsg.textContent = randomMsg;
+                
+                errorMsg.classList.remove('hidden');
+                setTimeout(() => input.classList.remove('shake', 'border-red-500'), 1000);
+            }
+        }
+
+        function launchMiniConfetti() { for (let i = 0; i < 30; i++) createConfettiPiece(); }
+        function launchConfetti() { setInterval(() => createConfettiPiece(), 100); }
+
+        function createConfettiPiece() {
+            const conf = document.createElement('div');
+            conf.innerHTML = `<i data-lucide="heart" class="w-4 h-4 text-pink-400 fill-current"></i>`;
+            conf.style.position = 'fixed';
+            conf.style.left = Math.random() * 100 + 'vw';
+            conf.style.top = '-5vh';
+            conf.style.zIndex = '100';
+            conf.style.pointerEvents = 'none';
+            conf.setAttribute('aria-hidden', 'true');
+            document.body.appendChild(conf);
+
+            conf.animate([
+                { transform: `translateY(0) rotate(0deg)`, opacity: 1 },
+                { transform: `translateY(100vh) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+            ], {
+                duration: (Math.random() * 3 + 2) * 1000,
+                easing: 'ease-out',
+                fill: 'forwards'
+            });
+            safeCreateIcons();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+        });
+    </script>
+</body>
+</html>
